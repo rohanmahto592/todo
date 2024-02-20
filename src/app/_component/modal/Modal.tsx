@@ -1,17 +1,25 @@
 "use client";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 interface modals {
   modalOpen: boolean;
   closeModal(): void;
+  taskItem:any
 }
 const Modal = (props: modals) => {
-  const { modalOpen, closeModal } = props;
+  const { modalOpen, closeModal,taskItem } = props;
+  const [id,setTaskId]=useState("");
   const [label, setLabel] = useState("");
   const [priority, setPriority] = useState("P1");
   const [status, setStatus] = useState('0');
   const [date, setDate] = useState("");
-
+  useEffect(()=>{
+    setTaskId(taskItem?._id||"")
+    setLabel(taskItem?.name||"")
+    setPriority(taskItem?.priority||"")
+    setDate(taskItem?.due_date||"");
+    setStatus(taskItem?.status||"");
+  },[taskItem])
   const handleLabelChange = (e: {
     target: { value: React.SetStateAction<string> };
   }) => {
@@ -36,7 +44,7 @@ const Modal = (props: modals) => {
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const body = { "name": label, "status": status, "priority": priority, "due_date": date };
+    const body = { _id:id, "name": label, "status": status, "priority": priority, "due_date": date };
     try {
         const response = await axios.post("http://127.0.0.1:5000/task", body);
         console.log(response);
@@ -75,6 +83,7 @@ const Modal = (props: modals) => {
                           Label Name
                         </label>
                         <input
+                         required
                           type="text"
                           id="label"
                           value={label}
@@ -126,7 +135,7 @@ const Modal = (props: modals) => {
                           Due Date
                         </label>
                         <input
-                          type="date"
+                          type="datetime-local"
                           id="status"
                           value={date}
                           onChange={handleDateChange}
