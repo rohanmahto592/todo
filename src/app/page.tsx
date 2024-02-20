@@ -7,11 +7,11 @@ export default function Home() {
   const [time, setTime] = useState("");
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [tasks, setTasks] = useState([]);
-  const [taskItem,setTaskItem]=useState(null);
+  const [taskItem, setTaskItem] = useState(null);
+  const [actionTriggered,setActionTriggered]=useState(false);
   const openModal = () => {
     setTaskItem(null);
     setModalOpen(true);
-   
   };
 
   const closeModal = () => {
@@ -26,21 +26,25 @@ export default function Home() {
         setTasks(response.data);
       }
     });
-  }, []);
+  }, [actionTriggered]);
   const deleteTask = (id: string) => {
-    axios
-      .delete(`http://127.0.0.1:5000/task`, { params: {"task_id": id } })
-      .then((response: any) => {
-        if (response.data) {
-          console.log(response);
-        }
-      });
+    try{
+      axios.delete(`http://127.0.0.1:5000/task/${id}`).then((response: any) => {
+      console.log(response);
+        setActionTriggered(!actionTriggered);
+      
+    });
+
+    }catch(err)
+    {
+      console.log(err);
+    }
+    
   };
-  const editTask=(task:any)=>{
+  const editTask = (task: any) => {
     openModal();
     setTaskItem(task);
-
-  }
+  };
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#cbd7e3]">
       <div className="h-auto  w-2/3 bg-white rounded-lg p-4">
@@ -49,11 +53,10 @@ export default function Home() {
           <p className="set_time">{time}</p>
         </div>
         <p className="text-xl font-semibold mt-2 text-[#063c76]">To-do List</p>
-
         <ul className="my-4 ">
           {tasks?.map((task: any, index: number) => {
             return (
-              <li key={index} className=" mt-4" >
+              <li key={index} className=" mt-4">
                 <div className="flex gap-2">
                   <div className="w-3/4 h-12 bg-[#e0ebff] rounded-[7px] flex justify-start items-center px-3">
                     <h2 className="text-sm font-semibold text-gray-800">
@@ -86,7 +89,7 @@ export default function Home() {
                   <button
                     type="button"
                     className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
-                    onClick={()=>editTask(task)}
+                    onClick={() => editTask(task)}
                   >
                     Edit
                   </button>
@@ -103,7 +106,13 @@ export default function Home() {
           Add Task
         </button>
 
-        <Modal taskItem={taskItem} modalOpen={modalOpen} closeModal={closeModal} />
+        <Modal
+        actionTriggered={actionTriggered}
+          setActionTriggered={setActionTriggered}
+          taskItem={taskItem}
+          modalOpen={modalOpen}
+          closeModal={closeModal}
+        />
       </div>
     </div>
   );

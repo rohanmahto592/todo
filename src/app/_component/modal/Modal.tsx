@@ -1,24 +1,26 @@
 "use client";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 interface modals {
   modalOpen: boolean;
   closeModal(): void;
-  taskItem:any
+  taskItem:any,
+  setActionTriggered:Dispatch<SetStateAction<boolean>>,
+  actionTriggered:boolean
 }
 const Modal = (props: modals) => {
-  const { modalOpen, closeModal,taskItem } = props;
+  const { modalOpen, closeModal,taskItem,setActionTriggered,actionTriggered } = props;
   const [id,setTaskId]=useState("");
   const [label, setLabel] = useState("");
   const [priority, setPriority] = useState("P1");
-  const [status, setStatus] = useState('0');
+  const [status, setStatus] = useState('Not yet started');
   const [date, setDate] = useState("");
   useEffect(()=>{
     setTaskId(taskItem?._id||"")
     setLabel(taskItem?.name||"")
-    setPriority(taskItem?.priority||"")
+    setPriority(taskItem?.priority||"P1")
     setDate(taskItem?.due_date||"");
-    setStatus(taskItem?.status||"");
+    setStatus(taskItem?.status||"Not yet started");
   },[taskItem])
   const handleLabelChange = (e: {
     target: { value: React.SetStateAction<string> };
@@ -48,6 +50,7 @@ const Modal = (props: modals) => {
     try {
         const response = await axios.post("http://127.0.0.1:5000/task", body);
         console.log(response);
+        setActionTriggered(!actionTriggered)
         // Handle form submission
     } catch (error) {
         console.error(error);
